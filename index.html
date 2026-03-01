@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <title>Secure Hostel Check-In / Check-Out System</title>
 
+<!-- FONT AWESOME ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
@@ -21,8 +22,7 @@ body {
 
 .app-container {
     width: 100%;
-    max-width: 900px;
-    padding: 20px;
+    max-width: 1100px;
 }
 
 header {
@@ -30,22 +30,16 @@ header {
     margin-bottom: 20px;
 }
 
-header h1 {
-    color: #0d6efd;
-}
-
-header p {
-    color: #555;
-}
+header h1 { color: #0d6efd; }
 
 .card {
     background: white;
-    padding: 30px;
+    padding: 25px;
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    text-align: center;
 }
+
+.hidden { display: none; }
 
 input, select {
     width: 100%;
@@ -56,46 +50,76 @@ input, select {
 }
 
 button {
-    padding: 10px 20px;
+    padding: 10px 15px;
     border: none;
     background: #0d6efd;
     color: white;
     border-radius: 6px;
     cursor: pointer;
-    margin: 5px;
+    margin-top: 10px;
 }
 
-button:hover {
-    opacity: 0.9;
-}
-
-.hidden {
-    display: none;
-}
+button:hover { opacity: 0.9; }
 
 .badge {
     padding: 6px 12px;
     border-radius: 20px;
-    color: white;
     font-size: 12px;
+    color: white;
 }
 
 .success { background: #198754; }
 .danger { background: #dc3545; }
 
-.step-container {
-    margin-top: 15px;
+/* DASHBOARD LAYOUT */
+.dashboard-container {
+    display: flex;
+    height: 500px;
 }
 
-.step {
-    display: inline-block;
-    padding: 8px 15px;
+.sidebar {
+    width: 220px;
+    background: #0d6efd;
+    color: white;
+    padding: 20px;
+    border-radius: 12px 0 0 12px;
+}
+
+.sidebar h3 { margin-top: 0; }
+
+.sidebar button {
+    width: 100%;
+    margin-top: 10px;
+    background: white;
+    color: #0d6efd;
+    font-weight: bold;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    background: white;
+    border-radius: 0 12px 12px 0;
+}
+
+/* PROGRESS TRACKER */
+.progress-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.progress-step {
+    flex: 1;
+    margin: 5px;
+    padding: 10px;
     border-radius: 20px;
     background: #dee2e6;
-    margin: 5px;
+    text-align: center;
+    font-size: 14px;
 }
 
-.active {
+.progress-step.active {
     background: #0d6efd;
     color: white;
 }
@@ -108,7 +132,8 @@ table {
 
 th, td {
     border: 1px solid #ddd;
-    padding: 10px;
+    padding: 8px;
+    text-align: center;
 }
 
 th {
@@ -123,7 +148,7 @@ th {
 <div class="app-container">
 
 <header>
-<h1>Secure Hostel Check-In / Check-Out System</h1>
+<h1><i class="fa-solid fa-shield-halved"></i> Secure Hostel System</h1>
 <p>No student leaves without parent & warden approval</p>
 <small>Simulation Prototype for Hackathon</small>
 </header>
@@ -131,13 +156,17 @@ th {
 <!-- LANDING -->
 <div id="landing" class="card">
 <h2>Welcome</h2>
-<button onclick="showPage('login')">Student Portal</button>
-<button onclick="showPage('wardenLogin')">Warden Portal</button>
+<button onclick="showPage('login')">
+<i class="fa-solid fa-user-graduate"></i> Student Portal
+</button>
+<button onclick="showPage('wardenLogin')">
+<i class="fa-solid fa-lock"></i> Warden Portal
+</button>
 </div>
 
 <!-- STUDENT LOGIN -->
 <div id="login" class="card hidden">
-<h2>Student Sign In</h2>
+<h2><i class="fa-solid fa-user"></i> Student Sign In</h2>
 <input id="loginId" placeholder="Student ID">
 <input id="loginName" placeholder="Name">
 <button onclick="loginStudent()">Sign In</button>
@@ -145,31 +174,55 @@ th {
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="card hidden">
-<h2>Dashboard</h2>
-<p id="studentDetails"></p>
+<div id="dashboard" class="hidden">
+
+<div class="dashboard-container">
+
+<div class="sidebar">
+<h3><i class="fa-solid fa-bars"></i> Menu</h3>
+<button onclick="showDashboardHome()">Dashboard</button>
 <button onclick="showPage('outing')">Request Outing</button>
+<button onclick="showPage('records')">View Logs</button>
 <button onclick="logout()">Sign Out</button>
+</div>
+
+<div class="main-content" id="dashboardHome">
+<div class="card">
+<h2><i class="fa-solid fa-user-graduate"></i> Student Details</h2>
+<p id="studentDetails"></p>
+</div>
+</div>
+
+</div>
 </div>
 
 <!-- OUTING -->
 <div id="outing" class="card hidden">
-<h2>Outing Request</h2>
+<h2><i class="fa-solid fa-paper-plane"></i> Outing Request</h2>
+
 <select id="outingType">
 <option>Home Outing</option>
 <option>Day Outing</option>
 </select>
+
 <button onclick="sendRequest()">Send Request</button>
 
-<div class="step-container hidden" id="steps">
-<div class="step active" id="parentStep">Parent Approval ⏳</div>
-<div class="step" id="wardenStep">Warden Verification 🔒</div>
+<div class="progress-container hidden" id="progressBar">
+<div class="progress-step active" id="step1">
+<i class="fa-solid fa-mobile-screen"></i> Parent Approval
+</div>
+<div class="progress-step" id="step2">
+<i class="fa-solid fa-lock"></i> Warden Verification
+</div>
+<div class="progress-step" id="step3">
+<i class="fa-solid fa-check-circle"></i> Completed
+</div>
 </div>
 </div>
 
-<!-- PARENT -->
+<!-- PARENT APPROVAL -->
 <div id="parentApproval" class="card hidden">
-<h2>Parent OTP Verification</h2>
+<h2><i class="fa-solid fa-mobile-screen"></i> Parent OTP</h2>
 <input id="otp" placeholder="Enter OTP (4321)">
 <button onclick="verifyParent()">Verify</button>
 <p id="parentStatus"></p>
@@ -177,7 +230,7 @@ th {
 
 <!-- WARDEN LOGIN -->
 <div id="wardenLogin" class="card hidden">
-<h2>Warden Login</h2>
+<h2><i class="fa-solid fa-lock"></i> Warden Login</h2>
 <input id="wardenUser" placeholder="Username">
 <input id="wardenPass" placeholder="Password" type="password">
 <button onclick="loginWarden()">Login</button>
@@ -186,22 +239,15 @@ th {
 
 <!-- FINGERPRINT -->
 <div id="fingerprint" class="card hidden">
-<h2>Fingerprint Verification</h2>
+<h2><i class="fa-solid fa-fingerprint"></i> Fingerprint Verification</h2>
 <input id="fingerCode" placeholder="Enter Code (9999)">
 <button onclick="verifyFinger()">Verify</button>
 <p id="fingerMsg"></p>
 </div>
 
-<!-- CHECKOUT -->
-<div id="checkout" class="card hidden">
-<h2>Check-Out Confirmation</h2>
-<p id="checkoutDetails"></p>
-<button onclick="markReturn()">Mark Student Returned</button>
-</div>
-
 <!-- RECORDS -->
 <div id="records" class="card hidden">
-<h2>Logs</h2>
+<h2><i class="fa-solid fa-table"></i> Logs</h2>
 <table>
 <thead>
 <tr>
@@ -214,7 +260,6 @@ th {
 </thead>
 <tbody id="recordTable"></tbody>
 </table>
-<button onclick="logout()">Sign Out</button>
 </div>
 
 </div>
@@ -225,8 +270,12 @@ let records = [];
 let loggedIn = false;
 
 function showPage(page) {
-document.querySelectorAll(".card").forEach(c => c.classList.add("hidden"));
+document.querySelectorAll(".card, #dashboard").forEach(el => el.classList.add("hidden"));
 document.getElementById(page).classList.remove("hidden");
+}
+
+function showDashboardHome(){
+showPage('dashboard');
 }
 
 function loginStudent() {
@@ -235,7 +284,7 @@ student.id = loginId.value;
 student.name = loginName.value;
 loggedIn = true;
 loginMsg.innerHTML = "<span class='badge success'>Login Successful</span>";
-studentDetails.innerHTML = "Welcome, "+student.name+" (ID: "+student.id+")";
+studentDetails.innerHTML = "Name: "+student.name+"<br>ID: "+student.id;
 setTimeout(()=> showPage('dashboard'),1000);
 } else {
 loginMsg.innerHTML = "<span class='badge danger'>Enter all fields</span>";
@@ -250,14 +299,14 @@ showPage('landing');
 function sendRequest() {
 if(!loggedIn) return alert("Please Sign In");
 showPage('parentApproval');
-document.getElementById("steps").classList.remove("hidden");
+progressBar.classList.remove("hidden");
 }
 
 function verifyParent() {
 if(otp.value==="4321") {
 parentStatus.innerHTML="<span class='badge success'>Approved</span>";
-parentStep.classList.remove("active");
-wardenStep.classList.add("active");
+step1.classList.remove("active");
+step2.classList.add("active");
 setTimeout(()=> showPage('wardenLogin'),1000);
 } else {
 parentStatus.innerHTML="<span class='badge danger'>Wrong OTP</span>";
@@ -276,28 +325,20 @@ wardenLoginMsg.innerHTML="<span class='badge danger'>Invalid Login</span>";
 function verifyFinger() {
 if(fingerCode.value==="9999") {
 fingerMsg.innerHTML="<span class='badge success'>Verified</span>";
+step2.classList.remove("active");
+step3.classList.add("active");
+
 let now = new Date().toLocaleString();
 student.outing = outingType.value;
 student.checkoutTime = now;
-setTimeout(()=>{
-checkoutDetails.innerHTML =
-"Name: "+student.name+
-"<br>Outing: "+student.outing+
-"<br>Time: "+now+
-"<br><span class='badge success'>Checked Out</span>";
-showPage('checkout');
-},1000);
-} else {
-fingerMsg.innerHTML="<span class='badge danger'>Failed</span>";
-}
-}
 
-function markReturn() {
-let now = new Date().toLocaleString();
-student.checkinTime = now;
 records.push({...student});
 updateTable();
-showPage('records');
+
+setTimeout(()=> showPage('records'),1000);
+} else {
+fingerMsg.innerHTML="<span class='badge danger'>Verification Failed</span>";
+}
 }
 
 function updateTable() {
@@ -309,7 +350,7 @@ recordTable.innerHTML+=
 "<td>"+r.name+"</td>"+
 "<td>"+r.outing+"</td>"+
 "<td>"+r.checkoutTime+"</td>"+
-"<td>"+r.checkinTime+"</td>"+
+"<td>"+(r.checkinTime || "-")+"</td>"+
 "</tr>";
 });
 }
