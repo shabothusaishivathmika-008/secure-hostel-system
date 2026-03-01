@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Secure Hostel Check-In / Check-Out System</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #eaf3ff, #e6fff5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    color: #0d6efd;
+}
+
+header p {
+    color: #555;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    background: #0d6efd;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.hidden {
+    display: none;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    color: white;
+    font-size: 12px;
+}
+
+.success { background: #198754; }
+.danger { background: #dc3545; }
+
+.step-container {
+    margin-top: 15px;
+}
+
+.step {
+    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 20px;
+    background: #dee2e6;
+    margin: 5px;
+}
+
+.active {
+    background: #0d6efd;
+    color: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+th {
+    background: #0d6efd;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app-container">
+
+<header>
+<h1>Secure Hostel Check-In / Check-Out System</h1>
+<p>No student leaves without parent & warden approval</p>
+<small>Simulation Prototype for Hackathon</small>
+</header>
+
+<!-- LANDING -->
+<div id="landing" class="card">
+<h2>Welcome</h2>
+<button onclick="showPage('login')">Student Portal</button>
+<button onclick="showPage('wardenLogin')">Warden Portal</button>
+</div>
+
+<!-- STUDENT LOGIN -->
+<div id="login" class="card hidden">
+<h2>Student Sign In</h2>
+<input id="loginId" placeholder="Student ID">
+<input id="loginName" placeholder="Name">
+<button onclick="loginStudent()">Sign In</button>
+<p id="loginMsg"></p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="card hidden">
+<h2>Dashboard</h2>
+<p id="studentDetails"></p>
+<button onclick="showPage('outing')">Request Outing</button>
+<button onclick="logout()">Sign Out</button>
+</div>
+
+<!-- OUTING -->
+<div id="outing" class="card hidden">
+<h2>Outing Request</h2>
+<select id="outingType">
+<option>Home Outing</option>
+<option>Day Outing</option>
+</select>
+<button onclick="sendRequest()">Send Request</button>
+
+<div class="step-container hidden" id="steps">
+<div class="step active" id="parentStep">Parent Approval ⏳</div>
+<div class="step" id="wardenStep">Warden Verification 🔒</div>
+</div>
+</div>
+
+<!-- PARENT -->
+<div id="parentApproval" class="card hidden">
+<h2>Parent OTP Verification</h2>
+<input id="otp" placeholder="Enter OTP (4321)">
+<button onclick="verifyParent()">Verify</button>
+<p id="parentStatus"></p>
+</div>
+
+<!-- WARDEN LOGIN -->
+<div id="wardenLogin" class="card hidden">
+<h2>Warden Login</h2>
+<input id="wardenUser" placeholder="Username">
+<input id="wardenPass" placeholder="Password" type="password">
+<button onclick="loginWarden()">Login</button>
+<p id="wardenLoginMsg"></p>
+</div>
+
+<!-- FINGERPRINT -->
+<div id="fingerprint" class="card hidden">
+<h2>Fingerprint Verification</h2>
+<input id="fingerCode" placeholder="Enter Code (9999)">
+<button onclick="verifyFinger()">Verify</button>
+<p id="fingerMsg"></p>
+</div>
+
+<!-- CHECKOUT -->
+<div id="checkout" class="card hidden">
+<h2>Check-Out Confirmation</h2>
+<p id="checkoutDetails"></p>
+<button onclick="markReturn()">Mark Student Returned</button>
+</div>
+
+<!-- RECORDS -->
+<div id="records" class="card hidden">
+<h2>Logs</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Outing</th>
+<th>Check-Out</th>
+<th>Check-In</th>
+</tr>
+</thead>
+<tbody id="recordTable"></tbody>
+</table>
+<button onclick="logout()">Sign Out</button>
+</div>
+
+</div>
+
+<script>
+let student = {};
+let records = [];
+let loggedIn = false;
+
+function showPage(page) {
+document.querySelectorAll(".card").forEach(c => c.classList.add("hidden"));
+document.getElementById(page).classList.remove("hidden");
+}
+
+function loginStudent() {
+if(loginId.value && loginName.value) {
+student.id = loginId.value;
+student.name = loginName.value;
+loggedIn = true;
+loginMsg.innerHTML = "<span class='badge success'>Login Successful</span>";
+studentDetails.innerHTML = "Welcome, "+student.name+" (ID: "+student.id+")";
+setTimeout(()=> showPage('dashboard'),1000);
+} else {
+loginMsg.innerHTML = "<span class='badge danger'>Enter all fields</span>";
+}
+}
+
+function logout() {
+loggedIn = false;
+showPage('landing');
+}
+
+function sendRequest() {
+if(!loggedIn) return alert("Please Sign In");
+showPage('parentApproval');
+document.getElementById("steps").classList.remove("hidden");
+}
+
+function verifyParent() {
+if(otp.value==="4321") {
+parentStatus.innerHTML="<span class='badge success'>Approved</span>";
+parentStep.classList.remove("active");
+wardenStep.classList.add("active");
+setTimeout(()=> showPage('wardenLogin'),1000);
+} else {
+parentStatus.innerHTML="<span class='badge danger'>Wrong OTP</span>";
+}
+}
+
+function loginWarden() {
+if(wardenUser.value==="admin" && wardenPass.value==="1234") {
+wardenLoginMsg.innerHTML="<span class='badge success'>Login Success</span>";
+setTimeout(()=> showPage('fingerprint'),1000);
+} else {
+wardenLoginMsg.innerHTML="<span class='badge danger'>Invalid Login</span>";
+}
+}
+
+function verifyFinger() {
+if(fingerCode.value==="9999") {
+fingerMsg.innerHTML="<span class='badge success'>Verified</span>";
+let now = new Date().toLocaleString();
+student.outing = outingType.value;
+student.checkoutTime = now;
+setTimeout(()=>{
+checkoutDetails.innerHTML =
+"Name: "+student.name+
+"<br>Outing: "+student.outing+
+"<br>Time: "+now+
+"<br><span class='badge success'>Checked Out</span>";
+showPage('checkout');
+},1000);
+} else {
+fingerMsg.innerHTML="<span class='badge danger'>Failed</span>";
+}
+}
+
+function markReturn() {
+let now = new Date().toLocaleString();
+student.checkinTime = now;
+records.push({...student});
+updateTable();
+showPage('records');
+}
+
+function updateTable() {
+recordTable.innerHTML="";
+records.forEach(r=>{
+recordTable.innerHTML+=
+"<tr>"+
+"<td>"+r.id+"</td>"+
+"<td>"+r.name+"</td>"+
+"<td>"+r.outing+"</td>"+
+"<td>"+r.checkoutTime+"</td>"+
+"<td>"+r.checkinTime+"</td>"+
+"</tr>";
+});
+}
+</script>
+
+</body>
+</html>
